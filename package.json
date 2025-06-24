@@ -4,6 +4,13 @@
   "description": "react form library",
   "license": "ISC",
   "author": "eze-arinze",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EzeArinze/use-smart-form"
+  },
+  "bugs": {
+    "url": "https://github.com/EzeArinze/use-smart-form/issues"
+  },
   "keywords": [
     "react",
     "form",
