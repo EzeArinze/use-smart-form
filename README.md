@@ -30,7 +30,7 @@ yarn install use-smart-form
 ```
 
 ```bash
-import { useSmartForm, SmartForm, SmartField } from "use-smart-form";
+import useSmartForm from "use-smart-form";
 import { z } from "zod";
 
 const schema = z.object({
@@ -42,7 +42,7 @@ const schema = z.object({
 });
 
 export default function ExampleForm() {
-   const { Form, Field, reset } = useSmartFormV2({
+   const { Form, Field, reset } = useSmartForm({
     schema,
     onSubmit: (values) => console.log(values),
   });
