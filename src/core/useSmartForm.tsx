@@ -8,6 +8,7 @@ import {
   useWatch,
   type FieldValues,
   type Path,
+  DefaultValues,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TypeOf, ZodTypeAny } from "zod";
@@ -44,12 +45,14 @@ type FieldProps<TFormValues extends FieldValues> = {
 export function useSmartForm<TSchema extends ZodTypeAny>(props: {
   schema: TSchema;
   onSubmit?: (values: TypeOf<TSchema>) => void;
+  defaultValues?: DefaultValues<TypeOf<TSchema>>;
 }) {
   type FormValues = TypeOf<TSchema>;
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(props.schema),
     mode: "onChange",
+    defaultValues: props.defaultValues || ({} as DefaultValues<FormValues>),
   });
 
   const Form = ({
