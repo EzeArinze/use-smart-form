@@ -26,7 +26,8 @@
     "rollup": "rollup -c --bundleConfigAsCjs",
     "build:css": "tailwindcss -i ./src/index.css -o ./dist/styles.css --minify",
     "build": "npm run build:css && rollup -c --bundleConfigAsCjs",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "patch": "npm version patch && npm run build"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
