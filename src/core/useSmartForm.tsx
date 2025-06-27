@@ -8,7 +8,7 @@ import {
   useWatch,
   type FieldValues,
   type Path,
-  DefaultValues,
+  type DefaultValues,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TypeOf, ZodTypeAny } from "zod";
@@ -24,7 +24,9 @@ type FieldType =
   | "file"
   | "date"
   | "range"
-  | "radio";
+  | "radio"
+  | "password"
+  | "tel";
 
 type FieldProps<TFormValues extends FieldValues> = {
   name: Path<TFormValues>;
@@ -52,7 +54,9 @@ export function useSmartForm<TSchema extends ZodTypeAny>(props: {
   const methods = useForm<FormValues>({
     resolver: zodResolver(props.schema),
     mode: "onChange",
+    reValidateMode: "onBlur",
     defaultValues: props.defaultValues || ({} as DefaultValues<FormValues>),
+    criteriaMode: "firstError", // Only show first error, not all errors
   });
 
   const Form = ({
@@ -98,37 +102,27 @@ export function useSmartForm<TSchema extends ZodTypeAny>(props: {
 
     let inputElement: React.ReactNode;
 
+    const baseProps = {
+      id: name,
+      ...rest,
+      className: cn(styles.input, hasError && "border-red-500", className),
+    };
+
     switch (type) {
       case "email":
       case "text":
       case "date":
-        inputElement = (
-          <input
-            id={name}
-            type={type}
-            {...register(name)}
-            {...rest}
-            className={cn(
-              styles.input,
-              hasError && "border-red-500",
-              className
-            )}
-          />
-        );
+      case "tel":
+      case "password":
+        inputElement = <input type={type} {...register(name)} {...baseProps} />;
         break;
 
       case "number":
         inputElement = (
           <input
-            id={name}
             type={type}
             {...register(name, { valueAsNumber: true })}
-            {...rest}
-            className={cn(
-              styles.input,
-              hasError && "border-red-500",
-              className
-            )}
+            {...baseProps}
           />
         );
         break;
@@ -177,11 +171,14 @@ export function useSmartForm<TSchema extends ZodTypeAny>(props: {
             id={name}
             type={type}
             accept={rest.accept}
+            multiple={rest.multiple}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                methods.setValue?.(name, file as any);
+              if (rest.multiple) {
+                const files = e.target.files ? Array.from(e.target.files) : [];
+                methods.setValue?.(name, files as FormValues[typeof name]);
+              } else {
+                const file = e.target.files?.[0] || null;
+                methods.setValue?.(name, file as FormValues[typeof name]);
               }
             }}
             {...(rest as React.InputHTMLAttributes<HTMLInputElement>)}
@@ -290,7 +287,8 @@ export function useSmartForm<TSchema extends ZodTypeAny>(props: {
 
   return {
     ...methods,
-    Form,
-    Field,
+    Form: React.useCallback(Form, [Form, methods, props.onSubmit]),
+    Field: React.memo(Field),
+    useWatch,
   };
 }
